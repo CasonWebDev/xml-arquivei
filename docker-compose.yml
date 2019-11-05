@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+
+  teste-arquivei-app:
+    container_name: teste-arquivei-app
+    build:
+      context: .docker
+      dockerfile: Docker/Dockerfile
+    image: teste-arquivei
+    depends_on:
+      - teste-arquivei-mysql
+    volumes:
+      - ./:/application:cached
+
+  teste-arquivei-nginx:
+    container_name: teste-arquivei-nginx
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - .docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:cached
+      - ./:/application:cached
+      - .docker/nginx/:/var/log/nginx/
+    depends_on:
+      - teste-arquivei-app
+      - teste-arquivei-mysql
+
+  teste-arquivei-mysql:
+    container_name: teste-arquivei-mysql
+    image: mysql:5.7
+    ports:
+      - "8890:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=teste-arquivei
+      - MYSQL_USER=cason
+      - MYSQL_PASSWORD=root
+    volumes:
+      - teste-arquivei-mysql-data:/var/lib/mysql:cached
+
+volumes:
+  teste-arquivei-mysql-data:
